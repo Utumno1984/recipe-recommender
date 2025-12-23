@@ -57,6 +57,8 @@ const Results: React.FC<ResultsProps> = ({ area, ingredient, ingredientDescripti
   const handleVote = (recipe: SimpleRecipe, liked: boolean) => {
     saveInteraction(recipe, liked, { area, ingredient });
     setVotedItems(prev => ({ ...prev, [recipe.idMeal]: true }));
+    // excludes the voted recipe from the list
+    /* setMatches(prev => prev.filter(r => r.idMeal !== recipe.idMeal)); */
   };
 
   const handleNextIdea = () => {
