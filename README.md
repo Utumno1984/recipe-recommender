@@ -5,16 +5,19 @@ Built as a solution for the "Two-Step Recommender" developer exercise.
 
 ## Features ✨
 
-- **Two-Step Wizard**: 
+- **Two-Step Wizard**:
   - **Step 1**: Choose a Cuisine (Area) from dynamic options.
   - **Step 2**: Search for a Main Ingredient with real-time filtering.
-- **Smart Recommendation**:
-  - Displays a **single** recipe match at a time.
-  - **"New Idea"** button to cycle through other recipes matching the same criteria.
-  - **Vote & Save**: Users can "Like" or "Dislike" recommendations. Interactive feedback is saved locally.
+- **Smart Recommendation Engine**:
+  - **Single-View UI**: Displays one curated recipe at a time to reduce decision paralysis.
+  - **"New Idea" Navigation**: Allows users to cycle through other matches if the current one doesn't inspire them.
+  - **Ingredient Insights**: Interactive info overlay to view details about the selected main ingredient.
+- **Interactive Feedback**:
+  - **Vote & Save**: Users can provide immediate "Yes/No" feedback.
+  - **Visual Confirmation**: The UI updates instantly upon voting to prevent duplicate interactions.
 - **History Tracking**:
-  - All saved interactions are persisted in `localStorage`.
-  - View your history of liked/disliked recipes in the History tab.
+  - All interactions (Matches & Rejections) are persisted in `localStorage` with timestamps and search criteria.
+  - View your history of approved/discarded recipes in the History tab.
 - **Responsive Design**: Mobile-first UI using Tailwind CSS.
 
 ## Tech Stack 🛠️
@@ -44,10 +47,10 @@ Built as a solution for the "Two-Step Recommender" developer exercise.
 
 ## Design Decisions 🎨
 
-- **Single Card View**: Instead of overwhelming the user with a list, we present one recipe at a time ("Tinder for Food" style) to focus attention and simplify the decision process.
-- **Client-Side Filtering**: Since TheMealDB API has limitations on complex queries, we fetch recipes by Area and Ingredient in parallel (`Promise.all`) and compute the intersection on the client side for accurate results.
-- **Zero-Layout-Shift**: Used `h-screen` and `overflow-hidden` container strategies to prevent the whole page from scrolling, keeping navigation bars fixed and providing a native-app-like feel on mobile.
-- **Accessibility**: Semantic HTML tags, clear button labeling, and keyboard-friendly navigation.
+- **Sequential Discovery (Single Card UI)**: Instead of overwhelming the user with a grid of results, I implemented a single-card view. This focuses the user's attention on one option at a time, simplifying the decision-making process (similar to modern discovery apps).
+- **Client-Side Intersection Logic**: Since TheMealDB API limits complex queries (no direct filtering by Area AND Ingredient), I fetch both datasets in parallel using `Promise.all` and perform a high-performance intersection on the client side.
+- **Immediate Feedback Loop**: The "Like/Dislike" buttons are integrated directly into the discovery card. Once voted, the card state changes to provide visual confirmation, ensuring a smooth UX without page reloads.
+- **Zero-Layout-Shift**: Used `overflow-hidden` strategies and absolute positioning for overlays (like the ingredient description) to keep the experience app-like and stable on mobile devices.
 
 ## Project Structure 📂
 
