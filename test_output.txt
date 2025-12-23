@@ -1,0 +1,19 @@
+﻿
+> recipe-recommender@0.0.0 test
+> vitest --run
+
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90mC:/Users/shado/Documents/projects/esercitazione/recipe-recommender[39m
+
+ [32mÔ£ô[39m src/tests/StepOne.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 33[2mms[22m[39m
+[90mstdout[2m | src/tests/StepTwo.test.tsx[2m > [22m[2mStepTwo - Dynamic Search[2m > [22m[2mfiltra gli ingredienti in tempo reale mentre l'utente scrive
+[22m[39mDEBUG DOM: <div><div class="flex h-full flex-col gap-6"><header><h2 class="text-2xl font-bold">Step 2: Ingrediente Base</h2><p class="text-gray-600">Digita e seleziona un ingrediente che hai a disposizione.</p></header><div class="flex flex-1 relative p-2"><div class="w-full"><input placeholder="Cerca ingrediente (es. Chicken, Tomato...)" class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 outline-none transition-all" type="text" value="Chocolate"></div></div><div class="bg-orange-100 p-3 rounded-lg text-orange-800">Hai selezionato: <strong>Chocolate</strong></div><footer class="mt-8 flex justify-between"><button class="text-gray-500 font-medium">Indietro</button><button class="px-8 py-3 rounded-full font-semibold text-white bg-orange-600">Trova Ricetta</button></footer></div></div>
+
+ [31mÔØ»[39m src/tests/StepTwo.test.tsx [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 194[2mms[22m[39m
+[31m     [31m├ù[31m filtra gli ingredienti in tempo reale mentre l'utente scrive[39m[32m 193[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m   Start at [22m 16:56:51
+[2m   Duration [22m 1.48s[2m (transform 91ms, setup 228ms, import 337ms, tests 227ms, environment 1.58s)[22m
+
