@@ -9,18 +9,18 @@ import ImageWithLoader from './ui/ImageWithLoader';
 interface ResultsProps {
   area: string;
   ingredient: string;
-  ingredientDescription?: string;
   onRestart: () => void;
   onBack: () => void;
 }
 
-const Results: React.FC<ResultsProps> = ({ area, ingredient, ingredientDescription, onRestart, onBack }) => {
+const Results: React.FC<ResultsProps> = ({ area, ingredient, onRestart, onBack }) => {
   const [matches, setMatches] = useState<SimpleRecipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const { saveInteraction } = useHistory();
   const [votedItems, setVotedItems] = useState<Record<string, boolean>>({});
   const [showDescription, setShowDescription] = useState(false);
+  const [ingredientDescription, setIngredientDescription] = useState<string | null>(null);
 
   useEffect(() => {
     setShowDescription(false);
@@ -32,11 +32,16 @@ const Results: React.FC<ResultsProps> = ({ area, ingredient, ingredientDescripti
       try {
         // The API doesn't support filtering by Area AND Ingredient simultaneously.
         // We fetch both lists and perform an intersection on the client side.
-        const [areaRecipes, ingRecipes] = await Promise.all([
+        // Also fetch all ingredients to find the description for the selected ingredient.
+        const [areaRecipes, ingRecipes, allIngredients] = await Promise.all([
           api.getRecipesByArea(area),
-          api.getRecipesByIngredient(ingredient)
+          api.getRecipesByIngredient(ingredient),
+          api.getIngredients()
         ]);
 
+        // Find description
+        const foundIngredient = allIngredients.find(i => i.name.toLowerCase() === ingredient.toLowerCase());
+        setIngredientDescription(foundIngredient?.description || null);
 
         const intersect = areaRecipes.filter(a =>
           ingRecipes.some(i => i.idMeal === a.idMeal)

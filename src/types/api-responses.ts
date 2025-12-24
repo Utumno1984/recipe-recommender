@@ -26,4 +26,5 @@ export interface SimpleRecipe {
   strMeal: string;
   strMealThumb: string;
   idMeal: string;
+  strDescription: string | null;
 }
