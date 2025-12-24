@@ -26,8 +26,8 @@ describe('Results Component', () => {
 
     it('shows ONE recipe at a time after loading', async () => {
         const mockRecipes = [
-            { idMeal: '1', strMeal: 'Pizza Margherita', strMealThumb: 'pizza.jpg' },
-            { idMeal: '2', strMeal: 'Pasta al Pomodoro', strMealThumb: 'pasta.jpg' }
+            { idMeal: '1', strMeal: 'Pizza Margherita', strMealThumb: 'pizza.jpg', strDescription: 'Description' },
+            { idMeal: '2', strMeal: 'Pasta al Pomodoro', strMealThumb: 'pasta.jpg', strDescription: 'Description' }
         ];
 
         // Arrange
@@ -50,8 +50,8 @@ describe('Results Component', () => {
 
     it('cycles through recipes when New Idea is clicked', async () => {
         const mockRecipes = [
-            { idMeal: '1', strMeal: 'Pizza Margherita', strMealThumb: 'pizza.jpg' },
-            { idMeal: '2', strMeal: 'Pasta al Pomodoro', strMealThumb: 'pasta.jpg' }
+            { idMeal: '1', strMeal: 'Pizza Margherita', strMealThumb: 'pizza.jpg', strDescription: 'Description' },
+            { idMeal: '2', strMeal: 'Pasta al Pomodoro', strMealThumb: 'pasta.jpg', strDescription: 'Description' }
         ];
 
         mockGetRecipesByArea.mockResolvedValue(mockRecipes);
