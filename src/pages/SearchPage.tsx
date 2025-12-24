@@ -1,27 +1,59 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Results from "../components/Results";
 import StepOne from "../components/StepOne";
 import StepTwo from "../components/StepTwo";
 
-const SearchPage = () => {
-    const [step, setStep] = useState(1);
-    const [formData, setFormData] = useState({
-        area: '',
-        ingredient: '',
-        ingredientDescription: ''
-    });
+const DEFAULT_PARAMS = {
+    step: '1',
+    area: '',
+    ingredient: ''
+};
 
-    // Functions to update state
-    const updateArea = (area: string) => {
-        setFormData(prev => ({ ...prev, area }));
+const SearchPage = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Derived State - Single Source of Truth (The URL)
+    const step = parseInt(searchParams.get('step') || '1');
+    const area = searchParams.get('area') || '';
+    const ingredient = searchParams.get('ingredient') || '';
+
+    // Helper to update search params while preserving existing ones
+    const updateParams = (updates: Record<string, string>) => {
+        setSearchParams(prev => {
+            const newParams = new URLSearchParams(prev);
+            Object.entries(updates).forEach(([key, value]) => {
+                newParams.set(key, value);
+            });
+            return newParams;
+        });
     };
 
-    const updateIngredient = (ingredient: string, description?: string) => {
-        setFormData(prev => ({
-            ...prev,
-            ingredient,
-            ingredientDescription: description || ''
-        }));
+    useEffect(() => {
+        const currentStep = searchParams.get('step');
+
+        // Only run this effect to set defaults if the URL is completely empty or invalid
+        // logic: if 'step' is missing, likely everything is missing or initial load
+        if (!currentStep) {
+            const newParams = new URLSearchParams(searchParams);
+            if (!newParams.has('step')) newParams.set('step', DEFAULT_PARAMS.step);
+            if (!newParams.has('area')) newParams.set('area', DEFAULT_PARAMS.area);
+            if (!newParams.has('ingredient')) newParams.set('ingredient', DEFAULT_PARAMS.ingredient);
+
+            setSearchParams(newParams, { replace: true });
+        }
+    }, [searchParams, setSearchParams]);
+
+    const setStepHandler = (newStep: number) => {
+        updateParams({ step: String(newStep) });
+    };
+
+    const updateArea = (newArea: string) => {
+        updateParams({ area: newArea });
+    };
+
+    const updateIngredient = (newIngredient: string) => {
+        updateParams({ ingredient: newIngredient });
     };
 
     return (
@@ -45,28 +77,27 @@ const SearchPage = () => {
                 <div className='flex flex-1 flex-col relative min-h-0 transition-all duration-300 ease-in-out'>
                     {step === 1 && (
                         <StepOne
-                            selectedArea={formData.area}
+                            selectedArea={area}
                             onSelect={updateArea}
-                            onNext={() => setStep(2)}
+                            onNext={() => setStepHandler(2)}
                         />
                     )}
 
                     {step === 2 && (
                         <StepTwo
-                            selectedIngredient={formData.ingredient}
+                            selectedIngredient={ingredient}
                             onSelect={updateIngredient}
-                            onBack={() => setStep(1)}
-                            onNext={() => setStep(3)} // We will go to the results page
+                            onBack={() => setStepHandler(1)}
+                            onNext={() => setStepHandler(3)} // We will go to the results page
                         />
                     )}
 
                     {step === 3 && (
                         <Results
-                            area={formData.area}
-                            ingredient={formData.ingredient}
-                            ingredientDescription={formData.ingredientDescription}
-                            onRestart={() => setStep(1)}
-                            onBack={() => setStep(2)}
+                            area={area}
+                            ingredient={ingredient}
+                            onRestart={() => setStepHandler(1)}
+                            onBack={() => setStepHandler(2)}
                         />
                     )}
                 </div>
