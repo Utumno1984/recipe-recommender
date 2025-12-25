@@ -23,7 +23,11 @@ const SearchPage = () => {
         setSearchParams(prev => {
             const newParams = new URLSearchParams(prev);
             Object.entries(updates).forEach(([key, value]) => {
-                newParams.set(key, value);
+                if (value === '') {
+                    newParams.delete(key);
+                } else {
+                    newParams.set(key, value);
+                }
             });
             return newParams;
         });
@@ -96,7 +100,13 @@ const SearchPage = () => {
                         <Results
                             area={area}
                             ingredient={ingredient}
-                            onRestart={() => setStepHandler(1)}
+                            onRestart={() => {
+                                updateParams({
+                                    step: '1',
+                                    area: '',
+                                    ingredient: ''
+                                });
+                            }}
                             onBack={() => setStepHandler(2)}
                         />
                     )}
