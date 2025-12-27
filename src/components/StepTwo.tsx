@@ -2,6 +2,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import React, { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../services/api';
 import type { Ingredient } from '../types/api-responses';
+import ImageWithLoader from './ui/ImageWithLoader';
 
 interface StepTwoProps {
     selectedIngredient: string;
@@ -45,10 +46,14 @@ const StepTwo: React.FC<StepTwoProps> = ({ selectedIngredient, onSelect, onBack,
     const rowVirtualizer = useVirtualizer({
         count: filteredIngredients.length,
         getScrollElement: () => parentRef.current,
-        // Fixed size for better performance and smoother scrolling
-        estimateSize: () => 56,
+        // Fixed size for better performance and smoother scrolling (increased for description)
+        estimateSize: () => 88,
         overscan: 5,
     });
+
+    const selectedIngredientObj = useMemo(() =>
+        ingredients.find(i => i.name === selectedIngredient),
+        [ingredients, selectedIngredient]);
 
     return (
         <div className="flex h-full flex-col gap-6">
@@ -100,25 +105,59 @@ const StepTwo: React.FC<StepTwoProps> = ({ selectedIngredient, onSelect, onBack,
                                                 setSearchTerm(ing.name);
                                                 setOpen(false);
                                             }}
-                                            className="p-4 hover:bg-orange-50 cursor-pointer border-b last:border-0 absolute top-0 left-0 w-full h-[56px] overflow-hidden whitespace-nowrap text-ellipsis"
+                                            className="p-3 hover:bg-orange-50 cursor-pointer border-b last:border-0 absolute top-0 left-0 w-full h-[88px] overflow-hidden flex items-start gap-3"
                                             style={{
                                                 transform: `translateY(${virtualRow.start}px)`,
-                                                height: '56px', // Enforce fixed height
+                                                height: '88px', // Enforce fixed height
                                             }}
                                         >
-                                            {ing.name}
-                                        </div>
+                                            <div className="w-12 h-12 flex-shrink-0 mt-1">
+                                                <ImageWithLoader
+                                                    src={`https://www.themealdb.com/images/ingredients/${ing.name.replace(/ /g, '_')}-small.png`}
+                                                    alt={ing.name}
+                                                    containerClassName="w-full h-full rounded"
+                                                    imageClassName="w-full h-full object-contain"
+                                                />
+                                            </div >
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-semibold text-gray-800">{ing.name}</div>
+                                                {ing.description && (
+                                                    <p className="text-sm text-gray-500 line-clamp-2 leading-snug">
+                                                        {ing.description}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div >
                                     );
                                 })}
-                            </div>
-                        </div>
+                            </div >
+                        </div >
                     )}
-                </div>
-            </div>
+                </div >
+            </div >
 
-            {(selectedIngredient && (searchTerm === selectedIngredient)) && (
-                <div className="bg-orange-100 p-3 rounded-lg text-orange-800">
-                    You selected: <strong>{selectedIngredient}</strong>
+            {selectedIngredient && selectedIngredientObj && (searchTerm === selectedIngredient) && (
+                <div className="bg-orange-50 p-4 rounded-xl border border-orange-100 flex gap-4 items-start animate-in fade-in slide-in-from-bottom-2">
+                    <div className="w-24 h-24 flex-shrink-0 bg-white rounded-lg p-2 shadow-sm">
+                        <ImageWithLoader
+                            src={`https://www.themealdb.com/images/ingredients/${selectedIngredient.replace(/ /g, '_')}.png`}
+                            alt={selectedIngredient}
+                            containerClassName="w-full h-full"
+                            imageClassName="w-full h-full object-contain"
+                        />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-lg text-orange-900 mb-1">
+                            {selectedIngredient}
+                        </h3>
+                        {selectedIngredientObj.description ? (
+                            <p className="text-sm text-gray-600 leading-relaxed max-h-32 overflow-y-auto pr-2">
+                                {selectedIngredientObj.description}
+                            </p>
+                        ) : (
+                            <p className="text-sm text-gray-400 italic">No description available.</p>
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -133,7 +172,7 @@ const StepTwo: React.FC<StepTwoProps> = ({ selectedIngredient, onSelect, onBack,
                     Find Recipe
                 </button>
             </footer>
-        </div>
+        </div >
     );
 };
 
