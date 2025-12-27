@@ -61,8 +61,8 @@ const SearchPage = () => {
     };
 
     return (
-        <div className="h-full w-full bg-gray-50 flex flex-col items-center justify-center">
-            <div className="flex flex-col max-w-xl max-h-[calc(100%-1rem)] h-full w-full bg-white rounded-3xl shadow-2xl p-6 border border-gray-100">
+        <div className="h-full w-full bg-gray-50 flex flex-col items-center justify-center p-2 sm:p-4">
+            <div className="flex flex-col w-full md:max-w-2xl lg:max-w-4xl max-h-[calc(100%-1rem)] h-full bg-white rounded-3xl shadow-2xl p-6 border border-gray-100">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-xl font-black tracking-tight text-slate-800 uppercase">
                         Recipe <span className="text-orange-500">Lab.</span>

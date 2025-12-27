@@ -38,7 +38,7 @@ const StepOne: FC<StepOneProps> = ({ selectedArea, onSelect, onNext }) => {
         <p className="text-gray-600">Select a culinary tradition to start.</p>
       </header>
 
-      <div className="flex-1 min-h-0 grid grid-cols-2 sm:grid-cols-3 gap-3 p-2 overflow-y-auto">
+      <div className="flex-1 min-h-0 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 p-2 overflow-y-auto">
         {areas.map((area) => (
           <button
             key={area}

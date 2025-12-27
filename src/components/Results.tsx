@@ -1,8 +1,8 @@
-import { Frown, Info, Lightbulb, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { Frown, Lightbulb, ThumbsDown, ThumbsUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from '../hooks/useHistory';
 import { api } from '../services/api';
-import type { SimpleRecipe } from '../types/api-responses';
+import type { RecipeDetails, SimpleRecipe } from '../types/api-responses';
 import ImageWithLoader from './ui/ImageWithLoader';
 
 
@@ -11,66 +11,87 @@ interface ResultsProps {
   ingredient: string;
   onRestart: () => void;
   onBack: () => void;
+  randomize?: boolean;
 }
 
-const Results: React.FC<ResultsProps> = ({ area, ingredient, onRestart, onBack }) => {
+// Fisher-Yates shuffle algorithm
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
+const Results: React.FC<ResultsProps> = ({ area, ingredient, onRestart, onBack, randomize = true }) => {
   const [matches, setMatches] = useState<SimpleRecipe[]>([]);
+  const [fullRecipe, setFullRecipe] = useState<RecipeDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const { saveInteraction } = useHistory();
   const [votedItems, setVotedItems] = useState<Record<string, boolean>>({});
-  const [showDescription, setShowDescription] = useState(false);
-  const [ingredientDescription, setIngredientDescription] = useState<string | null>(null);
 
   useEffect(() => {
-    setShowDescription(false);
-  }, [currentIndex]);
-
-  useEffect(() => {
-    const findRecipes = async () => {
+    let ignore = false;
+    const fetchRecipes = async () => {
       setLoading(true);
       try {
-        // The API doesn't support filtering by Area AND Ingredient simultaneously.
-        // We fetch both lists and perform an intersection on the client side.
-        // Also fetch all ingredients to find the description for the selected ingredient.
-        const [areaRecipes, ingRecipes, allIngredients] = await Promise.all([
-          api.getRecipesByArea(area),
-          api.getRecipesByIngredient(ingredient),
-          api.getIngredients()
-        ]);
-
-        // Find description
-        const foundIngredient = allIngredients.find(i => i.name.toLowerCase() === ingredient.toLowerCase());
-        setIngredientDescription(foundIngredient?.description || null);
-
-        const intersect = areaRecipes.filter(a =>
-          ingRecipes.some(i => i.idMeal === a.idMeal)
-        );
-
-        // Prioritize perfect matches (intersect), but include others from the area to offer variety
-        const others = areaRecipes.filter(a => !intersect.some(i => i.idMeal === a.idMeal));
-        const combined = [...intersect, ...others];
-
-        setMatches(combined.slice(0, 10));
+        // Fetch using the new combined endpoint
+        const recipes = await api.filterRecipes({ area, ingredient });
+        // Randomize the order of recipes if requested
+        if (!ignore) {
+          setMatches(randomize ? shuffleArray(recipes) : recipes);
+        }
+      } catch (error) {
+        console.error("Failed to fetch recipes:", error);
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     };
-    findRecipes();
-  }, [area, ingredient]);
 
-  const handleVote = (recipe: SimpleRecipe, liked: boolean) => {
+    if (area || ingredient) {
+      fetchRecipes();
+    } else {
+      setMatches([]);
+    }
+
+    return () => {
+      ignore = true;
+    };
+  }, [area, ingredient, randomize]);
+
+  // Fetch full details when current index changes
+  useEffect(() => {
+    let ignore = false;
+    const fetchDetails = async () => {
+      if (matches.length > 0) {
+        setDetailsLoading(true);
+        try {
+          const details = await api.getRecipeById(matches[currentIndex].idMeal);
+          if (!ignore) setFullRecipe(details);
+        } catch (error) {
+          console.error("Failed to fetch recipe details:", error);
+        } finally {
+          if (!ignore) setDetailsLoading(false);
+        }
+      }
+    };
+    fetchDetails();
+    return () => { ignore = true; };
+  }, [currentIndex, matches]);
+
+  const handleVote = (recipe: SimpleRecipe | RecipeDetails, liked: boolean) => {
     saveInteraction(recipe, liked, { area, ingredient });
     setVotedItems(prev => ({ ...prev, [recipe.idMeal]: true }));
-    // excludes the voted recipe from the list
-    /* setMatches(prev => prev.filter(r => r.idMeal !== recipe.idMeal)); */
   };
 
   const handleNextIdea = () => {
     setCurrentIndex((prev) => (prev + 1) % matches.length);
   };
-
-
 
   if (loading) return <div className="text-center p-10">We are cooking your results...</div>;
 
@@ -88,74 +109,79 @@ const Results: React.FC<ResultsProps> = ({ area, ingredient, onRestart, onBack }
   }
 
   const currentRecipe = matches[currentIndex];
+  // Use fullRecipe if available and matching, otherwise fallback to simple data (prevents flickering)
+  const displayRecipe = (fullRecipe && fullRecipe.idMeal === currentRecipe.idMeal) ? fullRecipe : currentRecipe;
   const isVoted = votedItems[currentRecipe.idMeal];
 
   return (
     <div className="flex flex-col h-full text-center items-center">
       <h2 className="text-3xl font-bold mb-6">Here is your recipe!</h2>
 
-      <div className="flex-1 w-full max-w-md min-h-0 overflow-y-auto p-2">
-        <div key={currentRecipe.idMeal} className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-xl flex flex-col">
+      <div className="flex-1 w-full max-w-md md:max-w-3xl min-h-0 overflow-y-auto p-2 self-center">
+        <div key={currentRecipe.idMeal} className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-xl flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-500 h-auto md:h-full md:max-h-[450px] shrink-0">
 
-          <div className="relative w-full h-48 sm:h-64 bg-gray-100 flex items-center justify-center group overflow-hidden">
+          <div className="relative w-full h-48 sm:h-64 md:h-full md:w-1/2 bg-gray-100 flex items-center justify-center group overflow-hidden shrink-0">
             <ImageWithLoader
-              src={currentRecipe.strMealThumb}
-              alt={currentRecipe.strMeal}
+              src={displayRecipe.strMealThumb} // High quality
+              previewSrc={`${displayRecipe.strMealThumb}/preview`} // Low quality preview
+              alt={displayRecipe.strMeal}
               containerClassName="w-full h-full"
+              imageClassName="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-
-            {/* Info Icon for Description */}
-            {ingredientDescription && (
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowDescription(!showDescription); }}
-                className="absolute top-4 right-4 bg-white/80 p-2 rounded-full backdrop-blur-sm shadow-md hover:bg-white transition-all z-10"
-                title="Ingredient Info"
-              >
-                <Info className="w-5 h-5 text-gray-700" />
-              </button>
-            )}
-
-            {/* Description Overlay */}
-            {showDescription && ingredientDescription && (
-              <div
-                className="absolute inset-0 bg-black/80 backdrop-blur-sm p-6 text-white text-left overflow-y-auto z-20 transition-all animate-in fade-in cursor-pointer"
-                onClick={() => setShowDescription(false)}
-              >
-                <h4 className="font-bold text-lg mb-2 text-orange-400">{ingredient}</h4>
-                <p className="text-sm leading-relaxed text-gray-200">{ingredientDescription}</p>
-                <p className="text-xs text-gray-400 mt-4 italic">Tap to close</p>
-              </div>
-            )}
+            {/* Category Badge with reserved space/animation */}
+            <div className={`absolute top-4 right-4 transition-opacity duration-500 ${detailsLoading || !(displayRecipe as RecipeDetails).strCategory ? 'opacity-0' : 'opacity-100'}`}>
+              {(displayRecipe as RecipeDetails).strCategory && (
+                <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-orange-600 shadow-sm">
+                  {(displayRecipe as RecipeDetails).strCategory}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="p-6">
-            <h3 className="font-bold text-2xl mb-2">{currentRecipe.strMeal}</h3>
-            <p className="text-gray-500 mb-6">Area: {area}</p>
+          <div className="p-6 flex flex-col flex-1 md:w-1/2 justify-center">
+            {/* Title & Area Container - Fixed height to prevent jumps */}
+            <div className="mb-4">
+              <div className="h-16 flex items-center justify-center mb-1">
+                <h3 className="font-bold text-2xl line-clamp-2 leading-tight px-2">{displayRecipe.strMeal}</h3>
+              </div>
+              <p className="text-gray-500 text-sm">Area: {area}</p>
+            </div>
 
+            <div className="h-6 mb-6"> {/* Fixed space for link */}
+              <div className={`transition-opacity duration-500 ${detailsLoading ? 'opacity-0' : 'opacity-100'}`}>
+                {(displayRecipe as RecipeDetails).strSource && (
+                  <a href={(displayRecipe as RecipeDetails).strSource || '#'} target="_blank" rel="noopener noreferrer" className="inline-block text-orange-500 font-semibold hover:underline text-sm">
+                    View Full Recipe ↗
+                  </a>
+                )}
+              </div>
+            </div>
 
-            {!isVoted ? (
-              <div className="bg-slate-50 p-4 rounded-xl">
-                <p className="font-medium mb-3 text-slate-600">Is this what you were looking for?</p>
-                <div className="flex justify-center gap-4">
-                  <button
-                    onClick={() => handleVote(currentRecipe, false)}
-                    className="px-6 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 font-bold transition-colors flex items-center gap-2"
-                  >
-                    No <ThumbsDown className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleVote(currentRecipe, true)}
-                    className="px-6 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 font-bold shadow-lg shadow-green-200 transition-all flex items-center gap-2"
-                  >
-                    Yes, perfect! <ThumbsUp className="w-4 h-4" />
-                  </button>
+            <div className="mt-auto"> {/* Push buttons to bottom */}
+              {!isVoted ? (
+                <div className="bg-slate-50 p-4 rounded-xl">
+                  <p className="font-medium mb-3 text-slate-600">Is this what you were looking for?</p>
+                  <div className="flex justify-center gap-4">
+                    <button
+                      onClick={() => handleVote(displayRecipe, false)}
+                      className="px-6 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 font-bold transition-colors flex items-center gap-2"
+                    >
+                      No <ThumbsDown className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleVote(displayRecipe, true)}
+                      className="px-6 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 font-bold shadow-lg shadow-green-200 transition-all flex items-center gap-2"
+                    >
+                      Yes, perfect! <ThumbsUp className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="p-4 bg-blue-50 text-blue-800 rounded-xl font-medium animate-pulse">
-                Thanks for the feedback! Saved to history.
-              </div>
-            )}
+              ) : (
+                <div className="p-4 bg-blue-50 text-blue-800 rounded-xl font-medium animate-pulse">
+                  Thanks for the feedback! Saved to history.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
