@@ -1,32 +1,36 @@
 # Recipe Recommender App 🥘
 
-A React application that helps users find recipe ideas based on their preferences (Cuisine and Ingredient).
-Built as a solution for the "Two-Step Recommender" developer exercise.
+A React smart-finder application that helps users decide what to cook based on their preferences (Cuisine and Ingredient).
+Built as a solution for the "Two-Step Recommender" developer exercise, strictly adhering to the requirements while adding premium UX enhancements.
 
 ## Features ✨
 
-- **Two-Step Wizard**:
+- **Two-Step Wizard (Strict MVP)**:
   - **Step 1**: Choose a Cuisine (Area) from dynamic options.
-  - **Step 2**: Search for a Main Ingredient with real-time filtering.
+  - **Step 2**: Search for a Main Ingredient with **real-time autocomplete** filtering (Dynamic Search).
 - **Smart Recommendation Engine**:
-  - **Single-View UI**: Displays one curated recipe at a time to reduce decision paralysis.
-  - **"New Idea" Navigation**: Allows users to cycle through other matches if the current one doesn't inspire them.
-  - **Ingredient Insights**: Interactive info overlay to view details about the selected main ingredient.
+  - **Randomized Discovery**: Results are shuffled (Fisher-Yates) to ensure variety.
+  - **Premium Detail View**: Displays High-Res Image, Category Badge, and a direct **Link** to the full recipe/video.
+  - **"New Idea" Navigation**: Allows users to cycle through other matches without losing context.
+- **Responsive Design**:
+  - **Mobile-First**: Stacked layout for small screens.
+  - **Tablet/Desktop Optimization**: Adaptive "Split View" layout for the Results card to utilize wider screens effectively.
+- **PWA Ready**:
+  - **Installable**: Can be installed on mobile/desktop as a native-like app.
+  - **Offline Support**: Caches assets and API responses to work without an internet connection.
 - **Interactive Feedback**:
-  - **Vote & Save**: Users can provide immediate "Yes/No" feedback.
-  - **Visual Confirmation**: The UI updates instantly upon voting to prevent duplicate interactions.
-- **History Tracking**:
-  - All interactions (Matches & Rejections) are persisted in `localStorage` with timestamps and search criteria.
-  - View your history of approved/discarded recipes in the History tab.
-- **Responsive Design**: Mobile-first UI using Tailwind CSS.
+  - **Vote & Save**: "Like/Dislike" buttons saved to `localStorage`.
+  - **History Tracking**: View your history of saved recipes with **direct external links** to the source.
 
 ## Tech Stack 🛠️
 
 - **Framework**: React (Vite)
-- **Styling**: Tailwind CSS
-- **API**: [TheMealDB](https://www.themealdb.com/api.php) (Free, No Auth)
-- **State Management**: React Hooks (`useState`, `useEffect`, `useContext` pattern via custom hooks)
-- **Testing**: Vitest + React Testing Library
+- **Styling**: Tailwind CSS (with `lucide-react` icons)
+- **API**: [TheMealDB](https://www.themealdb.com/api.php)
+- **Tooling**:
+  - **Vitest**: Unit & Integration Testing
+  - **Storybook**: Component Documentation & Visual Testing
+  - **VitePWA**: Progressive Web App generation
 
 ## Setup Instructions 🚀
 
@@ -40,28 +44,47 @@ Built as a solution for the "Two-Step Recommender" developer exercise.
     npm run dev
     ```
     The app will start at `http://localhost:5173`.
-4.  **Run Tests**:
+
+4.  **Storybook (Component Library)**:
+    Visualize and test components in isolation:
     ```bash
-    npm test
+    npm run storybook
     ```
+    Opens interactive UI at `http://localhost:6006`.
+
+5.  **Run Tests**:
+    - **All Tests** (Unit + Storybook Interactions):
+      ```bash
+      npm test
+      ```
+    - **Only Storybook Tests**:
+      ```bash
+      npx vitest --project=storybook
+      ```
+
+6.  **Test PWA (Offline Mode)**:
+    Service Workers work best in production builds.
+    ```bash
+    npm run build
+    npm run preview
+    ```
+    Toggle "Offline" in DevTools or disconnect Wi-Fi to test.
 
 ## Design Decisions 🎨
 
-- **Sequential Discovery (Single Card UI)**: Instead of overwhelming the user with a grid of results, I implemented a single-card view. This focuses the user's attention on one option at a time, simplifying the decision-making process (similar to modern discovery apps).
-- **Client-Side Intersection Logic**: Since TheMealDB API limits complex queries (no direct filtering by Area AND Ingredient), I fetch both datasets in parallel using `Promise.all` and perform a high-performance intersection on the client side.
-- **Immediate Feedback Loop**: The "Like/Dislike" buttons are integrated directly into the discovery card. Once voted, the card state changes to provide visual confirmation, ensuring a smooth UX without page reloads.
-- **Zero-Layout-Shift**: Used `overflow-hidden` strategies and absolute positioning for overlays (like the ingredient description) to keep the experience app-like and stable on mobile devices.
+- **Single-Source of Truth (URL)**: Moved state to URL Params for shareability and history navigation.
+- **Storybook-First Development**: All UI components (`StepOne`, `Results`) are documented and visually tested in Storybook to ensure robustness before integration.
+- **Optimized API Strategy**: Two-phase fetching (List -> Details) with extensive caching logic to ensure speed and offline capability.
+- **Visual Polish**:
+  - **Split View Layout**: On larger screens, the results card expands to show the image and details side-by-side.
+  - **Micro-animations**: Entry animations and smooth transitions for a premium feel.
 
 ## Project Structure 📂
 
-- `src/components`: UI Components (StepOne, StepTwo, Results, Navbar)
-- `src/hooks`: Custom hooks (useHistory for localStorage logic)
+- `src/components`: UI Components
+- `.storybook`: Storybook configuration
+- `src/hooks`: Custom hooks (useHistory)
 - `src/services`: API integration layer
-- `src/pages`: Main page views (SearchPage, HistoryPage)
+- `src/pages`: Main page views
 - `src/types`: TypeScript interfaces
-
-## Future Improvements 🔮
-
-- [ ] Shareable URLs with query parameters.
-- [ ] Offline mode support.
-- [ ] More advanced filtering (Time, Difficulty).
+- `src/tests`: Unit tests (Logic) & Stories (Visual Interactions)
