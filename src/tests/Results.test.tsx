@@ -1,27 +1,30 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@storybook/test';
+import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Results from '../components/Results';
 import * as apiService from '../services/api';
 
 // Mock API
-const mockGetRecipesByArea = vi.spyOn(apiService.api, 'getRecipesByArea');
-const mockGetRecipesByIngredient = vi.spyOn(apiService.api, 'getRecipesByIngredient');
+const mockFilterRecipes = vi.spyOn(apiService.api, 'filterRecipes');
+// We also need to mock getIngredients because Results now calls it to find the description
+const mockGetIngredients = vi.spyOn(apiService.api, 'getIngredients');
 
 describe('Results Component', () => {
     // Reset mocks before each test to avoid test interference
     beforeEach(() => {
         vi.clearAllMocks();
+        // Default mock implementation for getIngredients
+        mockGetIngredients.mockResolvedValue([
+            { id: '1', name: 'Tomato', description: 'A red fruit' }
+        ]);
     });
 
     it('shows initial loading state', () => {
         // Arrange
-        // Return promises that don't resolve immediately to test loading state
-        mockGetRecipesByArea.mockReturnValue(new Promise(() => { }));
-        mockGetRecipesByIngredient.mockReturnValue(new Promise(() => { }));
+        mockFilterRecipes.mockReturnValue(new Promise(() => { }));
 
         // Act
         render(<Results area="Italian" ingredient="Tomato" onRestart={vi.fn()} onBack={vi.fn()} />);
-
     });
 
     it('shows ONE recipe at a time after loading', async () => {
@@ -31,8 +34,7 @@ describe('Results Component', () => {
         ];
 
         // Arrange
-        mockGetRecipesByArea.mockResolvedValue(mockRecipes);
-        mockGetRecipesByIngredient.mockResolvedValue(mockRecipes);
+        mockFilterRecipes.mockResolvedValue(mockRecipes);
 
         // Act
         render(<Results area="Italian" ingredient="Tomato" onRestart={vi.fn()} onBack={vi.fn()} />);
@@ -54,8 +56,7 @@ describe('Results Component', () => {
             { idMeal: '2', strMeal: 'Pasta al Pomodoro', strMealThumb: 'pasta.jpg', strDescription: 'Description' }
         ];
 
-        mockGetRecipesByArea.mockResolvedValue(mockRecipes);
-        mockGetRecipesByIngredient.mockResolvedValue(mockRecipes);
+        mockFilterRecipes.mockResolvedValue(mockRecipes);
 
         render(<Results area="Italian" ingredient="Tomato" onRestart={vi.fn()} onBack={vi.fn()} />);
 
@@ -73,8 +74,7 @@ describe('Results Component', () => {
     });
 
     it('calls onRestart when Start Over button is clicked', async () => {
-        mockGetRecipesByArea.mockResolvedValue([]);
-        mockGetRecipesByIngredient.mockResolvedValue([]);
+        mockFilterRecipes.mockResolvedValue([]);
 
         const mockOnRestart = vi.fn();
         render(<Results area="Italian" ingredient="Tomato" onRestart={mockOnRestart} onBack={vi.fn()} />);
