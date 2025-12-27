@@ -13,7 +13,7 @@ export const useHistory = () => {
     }, []);
 
     // The function now accepts TWO things: the recipe and the vote (true/false)
-    const saveInteraction = (recipe: SimpleRecipe, liked: boolean, criteria: { area: string, ingredient: string }) => {
+    const saveInteraction = (recipe: SimpleRecipe & Partial<HistoryItem>, liked: boolean, criteria: { area: string, ingredient: string }) => {
         setHistory((prev) => {
             // Create the new object
             const newItem: HistoryItem = {

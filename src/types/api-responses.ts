@@ -26,5 +26,13 @@ export interface SimpleRecipe {
   strMeal: string;
   strMealThumb: string;
   idMeal: string;
-  strDescription: string | null;
+}
+
+export interface RecipeDetails extends SimpleRecipe {
+  strCategory: string;
+  strArea: string;
+  strInstructions: string;
+  strTags: string | null;
+  strYoutube: string | null;
+  strSource: string | null;
 }

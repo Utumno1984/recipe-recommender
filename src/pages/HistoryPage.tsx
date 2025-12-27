@@ -36,9 +36,14 @@ const HistoryPage = () => {
                                 <p className="text-xs text-gray-500">
                                     {new Date(item.savedAt).toLocaleDateString()} - {new Date(item.savedAt).toLocaleTimeString()}
                                 </p>
+                                {item.strSource && (
+                                    <a href={item.strSource} target="_blank" rel="noopener noreferrer" className="text-sm text-orange-500 hover:text-orange-600 font-medium mt-1 inline-flex items-center gap-1">
+                                        View Recipe ↗
+                                    </a>
+                                )}
                             </div>
                             {/* Badge Like/Dislike */}
-                            <div className={`px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 ${item.liked ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                            < div className={`px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 ${item.liked ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                                 }`}>
                                 {item.liked ? (
                                     <>Liked <ThumbsUp className="w-3 h-3" /></>
@@ -49,8 +54,8 @@ const HistoryPage = () => {
                         </div>
                     ))}
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

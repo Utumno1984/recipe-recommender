@@ -18,6 +18,8 @@ export interface UserPreferences {
 export interface HistoryItem extends SimpleRecipe {
   savedAt: number;     // Quando è successo
   liked: boolean;      // True = Mi piace, False = Non mi piace
+  strSource?: string | null;  // Link alla ricetta originale
+  strYoutube?: string | null; // Link al video
   // Opzionale: se vuoi salvare anche i criteri usati come chiede il requisito
   criteria?: {
     area: string;
