@@ -34,7 +34,7 @@ describe('Results Component', () => {
         mockFilterRecipes.mockReturnValue(new Promise(() => { }));
 
         // Act
-        render(<Results area="Italian" ingredient="Tomato" onRestart={vi.fn()} onBack={vi.fn()} />);
+        render(<Results area="Italian" ingredient="Tomato" onRestart={vi.fn()} onBack={vi.fn()} randomize={false} />);
     });
 
     it('shows ONE recipe at a time after loading', async () => {
@@ -47,7 +47,7 @@ describe('Results Component', () => {
         mockFilterRecipes.mockResolvedValue(mockRecipes);
 
         // Act
-        render(<Results area="Italian" ingredient="Tomato" onRestart={vi.fn()} onBack={vi.fn()} />);
+        render(<Results area="Italian" ingredient="Tomato" onRestart={vi.fn()} onBack={vi.fn()} randomize={false} />);
 
         // Assert
         // Wait for loading
