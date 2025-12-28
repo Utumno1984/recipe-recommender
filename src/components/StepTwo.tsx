@@ -68,7 +68,7 @@ const StepTwo: React.FC<StepTwoProps> = ({ selectedIngredient, onSelect, onBack,
                         onFocus={() => setOpen(true)}
                         onBlur={() => {
                             // Delay hiding to allow click event to register on list items
-                            setTimeout(() => setOpen(false), 200);
+                            setOpen(false);
                         }}
                         type="text"
                         placeholder="Search ingredient (e.g. Chicken, Tomato...)"
