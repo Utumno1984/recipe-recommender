@@ -30,8 +30,7 @@ const Results: React.FC<ResultsProps> = ({ area, ingredient, onRestart, onBack, 
   const [loading, setLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { saveInteraction } = useHistory();
-  const [votedItems, setVotedItems] = useState<Record<string, boolean>>({});
+  const { saveInteraction, history } = useHistory();
 
   useEffect(() => {
     let ignore = false;
@@ -86,7 +85,6 @@ const Results: React.FC<ResultsProps> = ({ area, ingredient, onRestart, onBack, 
 
   const handleVote = (recipe: SimpleRecipe | RecipeDetails, liked: boolean) => {
     saveInteraction(recipe, liked, { area, ingredient });
-    setVotedItems(prev => ({ ...prev, [recipe.idMeal]: true }));
   };
 
   const handleNextIdea = () => {
@@ -111,7 +109,7 @@ const Results: React.FC<ResultsProps> = ({ area, ingredient, onRestart, onBack, 
   const currentRecipe = matches[currentIndex];
   // Use fullRecipe if available and matching, otherwise fallback to simple data (prevents flickering)
   const displayRecipe = (fullRecipe && fullRecipe.idMeal === currentRecipe.idMeal) ? fullRecipe : currentRecipe;
-  const isVoted = votedItems[currentRecipe.idMeal];
+  const isVoted = history.some(item => item.idMeal === currentRecipe.idMeal);
 
   return (
     <div className="flex flex-col h-full text-center items-center">
