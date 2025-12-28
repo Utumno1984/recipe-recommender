@@ -9,6 +9,16 @@ const mockFilterRecipes = vi.spyOn(apiService.api, 'filterRecipes');
 // We also need to mock getIngredients because Results now calls it to find the description
 const mockGetIngredients = vi.spyOn(apiService.api, 'getIngredients');
 
+// Mock useHistory hook
+const mockSaveInteraction = vi.fn();
+const mockHistory: any[] = [];
+vi.mock('../hooks/useHistory', () => ({
+    useHistory: () => ({
+        saveInteraction: mockSaveInteraction,
+        history: mockHistory
+    })
+}));
+
 describe('Results Component', () => {
     // Reset mocks before each test to avoid test interference
     beforeEach(() => {

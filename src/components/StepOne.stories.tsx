@@ -35,10 +35,8 @@ export const WithSelection: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        // Simulate user interaction: Click next
-        // Note: In a real test we might select an area first if it wasn't pre-selected
-        // Here we assume 'Italian' is selected via args, so Next should be enabled.
-        const nextButton = canvas.getByRole('button', { name: /Next/i });
+        // Wait for the button to appear (handles async loading)
+        const nextButton = await canvas.findByRole('button', { name: /Next/i });
 
         await expect(nextButton).toBeEnabled();
 
