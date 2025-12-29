@@ -1,5 +1,4 @@
-import { fireEvent, screen, waitFor } from '@storybook/test';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import StepOne from '../components/StepOne';
 import * as apiService from '../services/api'; // Import our service
