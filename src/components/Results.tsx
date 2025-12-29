@@ -142,7 +142,9 @@ const Results: React.FC<ResultsProps> = ({ area, ingredient, onRestart, onBack, 
               <div className="h-16 flex items-center justify-center mb-1">
                 <h3 className="font-bold text-2xl line-clamp-2 leading-tight px-2">{displayRecipe.strMeal}</h3>
               </div>
-              <p className="text-gray-500 text-sm">Area: {area}</p>
+              <p className="text-gray-500 text-sm">
+                Area: {(displayRecipe as RecipeDetails).strArea || area}
+              </p>
             </div>
 
             <div className="h-6 mb-6"> {/* Fixed space for link */}

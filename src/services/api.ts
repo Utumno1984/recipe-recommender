@@ -60,7 +60,33 @@ export const api = {
   filterRecipes: async (params: { area?: string; ingredient?: string }): Promise<SimpleRecipe[]> => {
     const { area, ingredient } = params;
 
-    // Construct unique cache key based on params
+    // Use intersection logic if both filters are present
+    if (area && ingredient) {
+      const cacheKey = `recipes-intersection-${area}-${ingredient}`;
+
+      return fetchWithCache(cacheKey, async () => {
+        // Fetch both lists in parallel
+        const [areaResponse, ingredientResponse] = await Promise.all([
+          fetch(`${BASE_URL}/filter.php?a=${area}`).then(r => r.json()),
+          fetch(`${BASE_URL}/filter.php?i=${ingredient}`).then(r => r.json())
+        ]);
+
+        const areaRecipes: SimpleRecipe[] = areaResponse.meals || [];
+        const ingredientRecipes: SimpleRecipe[] = ingredientResponse.meals || [];
+
+        // Create a Set of IDs from the smaller list for efficiency
+        // (Optimization: intersection is faster if we iterate the smaller list against the Set of the larger, 
+        // but here we just use Set for O(1) lookups)
+        const ingredientIds = new Set(ingredientRecipes.map(r => r.idMeal));
+
+        // Filter area recipes to keep only those present in ingredient list
+        const intersection = areaRecipes.filter(recipe => ingredientIds.has(recipe.idMeal));
+
+        return intersection;
+      });
+    }
+
+    // Existing single-filter logic fallback
     const cacheKey = `recipes-filter-${area || 'any'}-${ingredient || 'any'}`;
 
     return fetchWithCache(cacheKey, async () => {
