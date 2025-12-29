@@ -68,7 +68,7 @@ describe('Results Component', () => {
 
         mockFilterRecipes.mockResolvedValue(mockRecipes);
 
-        render(<Results area="Italian" ingredient="Tomato" onRestart={vi.fn()} onBack={vi.fn()} />);
+        render(<Results area="Italian" ingredient="Tomato" onRestart={vi.fn()} onBack={vi.fn()} randomize={false} />);
 
         // Act & Assert
         // Wait for first recipe
@@ -87,7 +87,7 @@ describe('Results Component', () => {
         mockFilterRecipes.mockResolvedValue([]);
 
         const mockOnRestart = vi.fn();
-        render(<Results area="Italian" ingredient="Tomato" onRestart={mockOnRestart} onBack={vi.fn()} />);
+        render(<Results area="Italian" ingredient="Tomato" onRestart={mockOnRestart} onBack={vi.fn()} randomize={false} />);
 
         await waitFor(() => expect(screen.getByText(/No recipes found/i)).toBeInTheDocument());
 
