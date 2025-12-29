@@ -102,6 +102,8 @@ const Results: React.FC<ResultsProps> = ({ area, ingredient, onRestart, onBack, 
         <button onClick={onRestart} className="bg-black text-white px-6 py-2 rounded-full">
           Try again with different criteria
         </button>
+        <span className="text-gray-500 font-medium mx-2">or</span>
+        <button onClick={onBack} className="bg-black text-white px-6 py-2 rounded-full">Go Back</button>
       </div>
     );
   }
